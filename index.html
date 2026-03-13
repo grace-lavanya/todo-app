@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ma To-Do List</title>
+  <style>
+    /* ── RESET & BASE ── */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #F0F4F8;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    /* ── CARTE PRINCIPALE ── */
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+    }
+
+    /* ── TITRE ── */
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1A1A2E;
+      margin-bottom: 0.3rem;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 1.8rem;
+    }
+
+    /* ── FORMULAIRE ── */
+    .form-group {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.8rem;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 2px solid #E8ECF0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #4361EE;
+    }
+    input[type="text"]::placeholder {
+      color: #BBB;
+    }
+    button.btn-add {
+      background: #4361EE;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button.btn-add:hover {
+      background: #3451D1;
+      transform: scale(1.05);
+    }
+
+    /* ── FILTRES ── */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .filter-btn {
+      background: transparent;
+      border: 1px solid #E8ECF0;
+      border-radius: 20px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: #888;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: #4361EE;
+      border-color: #4361EE;
+      color: white;
+    }
+
+    /* ── LISTE ── */
+    .todo-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    /* ── ITEM ── */
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.9rem 1rem;
+      background: #F8FAFC;
+      border-radius: 10px;
+      border: 1px solid #EEF0F3;
+      transition: background 0.2s, opacity 0.2s;
+      animation: slideIn 0.2s ease;
+    }
+    .todo-item:hover { background: #F0F4FF; }
+    .todo-item.done { opacity: 0.5; }
+
+    /* Checkbox custom */
+    .todo-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #4361EE;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .todo-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #1A1A2E;
+    }
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: #AAA;
+    }
+
+    /* Bouton supprimer */
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #CCC;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .btn-delete:hover {
+      color: #E63946;
+      background: #FFF0F0;
+    }
+
+    /* ── COMPTEUR ── */
+    .footer-info {
+      margin-top: 1.2rem;
+      font-size: 0.82rem;
+      color: #AAA;
+      text-align: center;
+    }
+
+    /* ── MESSAGE VIDE ── */
+    .empty-msg {
+      text-align: center;
+      color: #CCC;
+      font-size: 0.9rem;
+      padding: 2rem 0;
+    }
+
+    /* ── ANIMATION ── */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 520px) {
+      .card { padding: 1.4rem; }
+      h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>📝 Ma To-Do List</h1>
+  <p class="subtitle">Organise tes tâches simplement</p>
+
+  <!-- FORMULAIRE D'AJOUT -->
+  <div class="form-group">
+    <input type="text" id="input-tache" placeholder="Ajouter une tâche..." maxlength="100" />
+    <button class="btn-add" onclick="ajouterTache()" title="Ajouter">+</button>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="filtrer('toutes', this)">Toutes</button>
+    <button class="filter-btn" onclick="filtrer('actives', this)">À faire</button>
+    <button class="filter-btn" onclick="filtrer('terminees', this)">Terminées</button>
+  </div>
+
+  <!-- LISTE DES TÂCHES -->
+  <ul class="todo-list" id="liste-taches"></ul>
+
+  <!-- MESSAGE SI VIDE -->
+  <p class="empty-msg" id="msg-vide">Aucune tâche pour l'instant 🎉</p>
+
+  <!-- COMPTEUR -->
+  <p class="footer-info" id="compteur"></p>
+</div>
+
+<script>
+  // ── DONNÉES (stockées dans le navigateur pour l'instant) ──
+  let taches = JSON.parse(localStorage.getItem('taches')) || [];
+  let filtreCourant = 'toutes';
+
+  // ── SAUVEGARDER dans le navigateur ──
+  function sauvegarder() {
+    localStorage.setItem('taches', JSON.stringify(taches));
+  }
+
+  // ── AJOUTER une tâche ──
+  function ajouterTache() {
+    const input = document.getElementById('input-tache');
+    const texte = input.value.trim();
+
+    // Vérification : pas de tâche vide
+    if (texte === '') {
+      input.focus();
+      input.style.borderColor = '#E63946';
+      setTimeout(() => input.style.borderColor = '#E8ECF0', 1000);
+      return;
+    }
+
+    // Création de la tâche
+    const tache = {
+      id: Date.now(),       // ID unique basé sur l'heure
+      texte: texte,
+      faite: false
+    };
+
+    taches.push(tache);     // Ajouter au tableau
+    sauvegarder();          // Sauvegarder
+    afficher();             // Rafraîchir l'affichage
+
+    input.value = '';       // Vider le champ
+    input.focus();
+  }
+
+  // ── COCHER / DÉCOCHER une tâche ──
+  function toggleTache(id) {
+    const tache = taches.find(t => t.id === id);
+    if (tache) {
+      tache.faite = !tache.faite;
+      sauvegarder();
+      afficher();
+    }
+  }
+
+  // ── SUPPRIMER une tâche ──
+  function supprimerTache(id) {
+    taches = taches.filter(t => t.id !== id);
+    sauvegarder();
+    afficher();
+  }
+
+  // ── FILTRER ──
+  function filtrer(filtre, btn) {
+    filtreCourant = filtre;
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    afficher();
+  }
+
+  // ── AFFICHER les tâches ──
+  function afficher() {
+    const liste = document.getElementById('liste-taches');
+    const msgVide = document.getElementById('msg-vide');
+    const compteur = document.getElementById('compteur');
+
+    // Filtrage
+    let tachesFiltrees = taches;
+    if (filtreCourant === 'actives')   tachesFiltrees = taches.filter(t => !t.faite);
+    if (filtreCourant === 'terminees') tachesFiltrees = taches.filter(t => t.faite);
+
+    // Vider la liste
+    liste.innerHTML = '';
+
+    // Message si vide
+    msgVide.style.display = tachesFiltrees.length === 0 ? 'block' : 'none';
+
+    // Afficher chaque tâche
+    tachesFiltrees.forEach(tache => {
+      const li = document.createElement('li');
+      li.className = 'todo-item' + (tache.faite ? ' done' : '');
+      li.innerHTML = `
+        <input type="checkbox" ${tache.faite ? 'checked' : ''}
+               onchange="toggleTache(${tache.id})" />
+        <span class="todo-text">${tache.texte}</span>
+        <button class="btn-delete" onclick="supprimerTache(${tache.id})" title="Supprimer">✕</button>
+      `;
+      liste.appendChild(li);
+    });
+
+    // Compteur
+    const nbFaites = taches.filter(t => t.faite).length;
+    const nbTotal  = taches.length;
+    compteur.textContent = nbTotal > 0
+      ? `${nbFaites} / ${nbTotal} tâche${nbTotal > 1 ? 's' : ''} terminée${nbFaites > 1 ? 's' : ''}`
+      : '';
+  }
+
+  // ── TOUCHE ENTRÉE pour ajouter ──
+  document.getElementById('input-tache').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') ajouterTache();
+  });
+
+  // ── AFFICHAGE INITIAL ──
+  afficher();
+</script>
+
+</body>
+</html>
