@@ -103,7 +103,9 @@ def index():
     }), 200
 
 
+# ── LANCEMENT ──
+init_db()  # Appelé au démarrage même avec gunicorn
+
 if __name__ == '__main__':
-    init_db()
     print("🚀 Serveur démarré sur http://localhost:5000")
     app.run(debug=True, port=5000)
